@@ -23,18 +23,18 @@
             android:text="Service開始" />
 
         <Button
-            android:id="@+id/btnBindService"
+            android:id="@+id/btnStartLocation"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
-            android:text="サービスBind" />
+            android:text="位置情報 開始" />
 
         <Button
-            android:id="@+id/btnUnbindService"
+            android:id="@+id/btnStopLocation"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="70dp"
-            android:text="サービスUnbind" />
+            android:text="位置情報 終了" />
 
         <Button
             android:id="@+id/btnStopService"

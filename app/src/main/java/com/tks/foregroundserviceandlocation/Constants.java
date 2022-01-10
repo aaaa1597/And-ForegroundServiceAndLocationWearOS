@@ -8,6 +8,8 @@ public class Constants {
 		public static final String MAIN_ACTION = "uws.action.main";
 		public static final String START = "uws.action.start";
 		public static final String STOP = "uws.action.stop";
+		public static final String STARTLOC = "uws.action.startloc";
+		public static final String STOPLOC = "uws.action.stoploc";
 	}
 
 	public static class STATE_SERVICE {
