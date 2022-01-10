@@ -1,8 +1,12 @@
 package com.tks.foregroundserviceandlocation;
 
+import androidx.annotation.NonNull;
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
@@ -10,9 +14,11 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.location.SettingsClient;
+import java.util.Arrays;
 
 public class MainActivity extends Activity {
 	private final static int	REQUEST_LOCATION_SETTINGS	= 1111;
+	private final static int	REQUEST_PERMISSIONS			= 2222;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +50,14 @@ public class MainActivity extends Activity {
 			intent.setAction(Constants.ACTION.STOPLOC);
 			startService(intent);
 		});
+
+		/* 権限が許可されていない場合はリクエスト. */
+		if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+				requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.BLUETOOTH_ADVERTISE, Manifest.permission.BLUETOOTH_CONNECT}, REQUEST_PERMISSIONS);
+			else
+				requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSIONS);
+		}
 
 		/* 設定の位置情報ON/OFFチェック */
 		LocationSettingsRequest locationSettingsRequest = new LocationSettingsRequest.Builder().build();
@@ -80,5 +94,20 @@ public class MainActivity extends Activity {
 		super.onDestroy();
 
 		TLog.d("aaaaa");
+	}
+
+	@Override
+	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+		super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+		/* 対象外なので、無視 */
+		if (requestCode != REQUEST_PERMISSIONS) return;
+
+		/* 権限リクエストの結果を取得する. */
+		long ngcnt = Arrays.stream(grantResults).filter(value -> value != PackageManager.PERMISSION_GRANTED).count();
+		if (ngcnt > 0) {
+			ErrDialog.create(MainActivity.this, "このアプリには必要な権限です。\n再起動後に許可してください。\n終了します。").show();
+			return;
+		}
 	}
 }
