@@ -1,7 +1,5 @@
 package com.tks.foregroundserviceandlocation;
 
-import static com.tks.foregroundserviceandlocation.Constants.NOTIFICATION_CHANNEL_STARTSTOP;
-
 import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -11,23 +9,21 @@ import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.widget.RemoteViews;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
-
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
-
 import java.util.Locale;
+
+import static com.tks.foregroundserviceandlocation.Constants.NOTIFICATION_CHANNEL_STARTSTOP;
 
 public class FlcService extends Service {
 	@Nullable
@@ -78,7 +74,7 @@ public class FlcService extends Service {
 
 		/* 停止ボタン押下の処理実装 */
 		Intent stopIntent = new Intent(this, FlcService.class)
-				.setAction(Constants.ACTION.STOP);
+								.setAction(Constants.ACTION.STOP);
 		PendingIntent pendingStopIntent = PendingIntent.getService(this, 2222, stopIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 		RemoteViews remoteViews = new RemoteViews(getPackageName(), R.layout.notification);
 		remoteViews.setOnClickPendingIntent(R.id.btnStop, pendingStopIntent);
@@ -101,7 +97,6 @@ public class FlcService extends Service {
 	/* 位置情報 機能 */
 	/***************/
 	private final static int			LOC_UPD_INTERVAL = 1000;
-	private int							mFlcCnt = 0;
 	private FusedLocationProviderClient mFusedLocationClient;
 	private final LocationRequest mLocationRequest = LocationRequest.create()
 													.setInterval(LOC_UPD_INTERVAL)
@@ -113,14 +108,11 @@ public class FlcService extends Service {
 			super.onLocationResult(locationResult);
 			Location location = locationResult.getLastLocation();
 			TLog.d("1秒定期 (緯度:{0} 経度:{1})", String.format(Locale.JAPAN, "%1$.12f", location.getLatitude()), String.format(Locale.JAPAN, "%1$.12f", location.getLongitude()));
-			mFlcCnt++;
-			if(mFlcCnt >= 2) {
-				mFusedLocationClient.removeLocationUpdates(mLocationCallback);
-				mFlcCnt = 0;
-				TLog.d("re定期");
-				try { Thread.sleep(1000); } catch (InterruptedException e) { }
-				restartLoc();
-			}
+
+			/* 毎回OFF->ONにすることで、更新間隔が1秒になるようにしている。 */
+			mFusedLocationClient.removeLocationUpdates(mLocationCallback);
+			try { Thread.sleep(1000); } catch (InterruptedException e) { }
+			restartLoc();
 		}
 	};
 
